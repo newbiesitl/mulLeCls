@@ -23,6 +23,7 @@ print(output, error)
 # extract embeddings from json file and convert into list
 
 
+embedding_file_name = 'output.jsonl'
 
 
 # join embeddings with data set dataframe

@@ -1,4 +1,5 @@
 import os, sys
-cur_dir = os.path.dirname(__file__)
-data_folder = os.path.join(cur_dir, 'data')
-model_folder = os.path.join(cur_dir, 'models')
+project_root = os.path.dirname(__file__)
+dataset_name = 'jigsaw-toxic-comment-classification-challenge'
+data_folder = os.path.join(project_root, 'data')
+model_folder = os.path.join(project_root, 'models')
