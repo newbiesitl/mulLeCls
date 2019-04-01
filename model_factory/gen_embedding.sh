@@ -1,3 +1,5 @@
+source activate ml-dev
+
 cur_dir=$(pwd)
 data_folder=$cur_dir/../data/
 ls $data_folder
