@@ -3,18 +3,21 @@
 '''
 
 import keras
-
+import keras.backend as K
+import numpy as np
 
 from keras.losses import binary_crossentropy
 
 class SeqCLS(object):
     def __init__(self):
         self.m = None
-
+        self.model_t = None
+        self.num_classes = 0
 
     def configure(self, input_dim, seq_len, output_dim, h_dim, dropout,
-                  loss='binary_crossentropy',
+                  loss=binary_crossentropy,
                   ):
+        self.num_classes = output_dim
         m = keras.models.Sequential()
         lstm_layer = keras.layers.LSTM(
             input_shape=(seq_len, input_dim),
@@ -30,7 +33,7 @@ class SeqCLS(object):
         m.add(dense_h); m.add(keras.layers.AlphaDropout(0.5))
         m.add(
             keras.layers.Dense(
-                units=output_dim,
+                units=self.num_classes,
                 activation='sigmoid',
 
             )
@@ -40,3 +43,19 @@ class SeqCLS(object):
 
     def fit(self, X, Y, epochs=50, batch_size=32, ):
         self.m.fit(X, Y, epochs=epochs, batch_size=batch_size)
+
+        tensors = K.function([self.m.layers[0].input, K.learning_phase()],
+                                          [self.m.layers[-1].output])
+        self.model_t = tensors
+
+
+    def predict_with_uncertainty(self, X, sim=1):
+        result = self.sample_output(X, n_iter=sim)
+        prediction = result.mean(axis=0)
+        uncertainty = result.std(axis=0)
+        return prediction, uncertainty
+
+    def sample_output(self, X, n_iter=1):
+        result = np.zeros((n_iter,) + (X.shape[0], self.num_classes))
+        for i in range(n_iter):
+            result[i, :, :] = self.model_t((X, 1))[0]

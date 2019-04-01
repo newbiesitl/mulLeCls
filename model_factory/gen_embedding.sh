@@ -11,6 +11,7 @@ python $cur_dir/embeddings/bert-master/extract_features.py \
   --vocab_file=$BERT_BASE_DIR/vocab.txt \
   --bert_config_file=$BERT_BASE_DIR/bert_config.json \
   --init_checkpoint=$BERT_BASE_DIR/bert_model.ckpt \
-  --layers=-1,-2,-3,-4 \
+#  --layers=-1,-2,-3,-4 \
+  --layers=-1 \
   --max_seq_length=128 \
   --batch_size=8
