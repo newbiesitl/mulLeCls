@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+PATH=$PATH:/home/pintellect/anaconda3/condabin:/home/pintellect/anaconda3/bin
 echo $PATH
 source activate ml-dev
 cur_dir=$(pwd)
