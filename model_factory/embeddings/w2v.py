@@ -45,10 +45,10 @@ if __name__ == "__main__":
     Use as init script:
     load google.bin format and generate keyed vector format for faster loading
     '''
-    w2v_file_name = 'google.bin'
+    w2v_file_name = 'GoogleNews-vectors-negative300.bin'
     keyed_vec_file_name = 'google_keyed_vector_format.bin'
     import os
-    model_folder = ''
+    from config import model_folder
     w2v_to_keyed_vector(os.path.join(model_folder, w2v_file_name), os.path.join(model_folder, keyed_vec_file_name),
                         binary=True)
     embedding = w2v_load_from_keyedvectors(keyed_vec_file_name)
