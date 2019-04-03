@@ -2,6 +2,10 @@ from gensim.models.keyedvectors import KeyedVectors
 import numpy as np
 from keras.layers import Embedding
 from config import model_folder
+import os
+
+global model_folder
+
 
 def keyed_vector_to_keras_embedding(file_name):
     # embedding_file_name = 'google.google_keyed_vector_format.bin'
@@ -47,7 +51,6 @@ if __name__ == "__main__":
     '''
     w2v_file_name = 'GoogleNews-vectors-negative300.bin'
     keyed_vec_file_name = 'google_keyed_vector_format.bin'
-    import os
     from config import model_folder
     w2v_to_keyed_vector(os.path.join(model_folder, w2v_file_name), os.path.join(model_folder, keyed_vec_file_name),
                         binary=True)
