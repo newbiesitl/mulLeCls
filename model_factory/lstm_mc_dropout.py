@@ -5,7 +5,7 @@
 import keras
 import keras.backend as K
 import numpy as np
-
+import tensorflow as tf
 from keras.losses import binary_crossentropy
 
 class SeqCLS(object):
@@ -16,34 +16,31 @@ class SeqCLS(object):
 
     def configure(self, input_dim, seq_len, output_dim, h_dim, dropout=0.5,
                   loss=binary_crossentropy, pretrained_embedding=None,
+                  verbose=0,
                   ):
         self.num_classes = output_dim
-        m = keras.models.Sequential()
-        if pretrained_embedding is None:
-            lstm_layer = keras.layers.LSTM(
-                input_shape=(seq_len, input_dim),
-                return_sequences=False,
-                units=h_dim,
-                dropout=dropout, recurrent_dropout=dropout,
-            )
-            m.add(lstm_layer)
-        else:
-            lstm_layer = pretrained_embedding
-            m.add(lstm_layer)
-            m.add(
-                keras.layers.LSTM(
-                    return_sequences=True,
-                    units=h_dim,
-                    dropout=dropout, recurrent_dropout=dropout,
-                )
-            )
-            m.add(
-                keras.layers.LSTM(
+        with tf.device('/cpu:0'):
+            m = keras.models.Sequential()
+            if pretrained_embedding is None:
+                lstm_layer = keras.layers.LSTM(
+                    input_shape=(seq_len, input_dim),
                     return_sequences=False,
                     units=h_dim,
                     dropout=dropout, recurrent_dropout=dropout,
                 )
-            )
+                m.add(lstm_layer)
+                if verbose:
+                    m.summary()
+            else:
+                m.add(pretrained_embedding)
+                m.add(
+                    keras.layers.LSTM(
+                        return_sequences=False,
+                        units=h_dim,
+                        dropout=dropout, recurrent_dropout=dropout,
+                    )
+                )
+
         dense_h = keras.layers.Dense(
             units=h_dim,
             activation='selu',
