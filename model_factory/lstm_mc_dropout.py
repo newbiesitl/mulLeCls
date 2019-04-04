@@ -14,18 +14,36 @@ class SeqCLS(object):
         self.model_t = None
         self.num_classes = 0
 
-    def configure(self, input_dim, seq_len, output_dim, h_dim, dropout,
-                  loss=binary_crossentropy,
+    def configure(self, input_dim, seq_len, output_dim, h_dim, dropout=0.5,
+                  loss=binary_crossentropy, pretrained_embedding=None,
                   ):
         self.num_classes = output_dim
         m = keras.models.Sequential()
-        lstm_layer = keras.layers.LSTM(
-            input_shape=(seq_len, input_dim),
-            return_sequences=False,
-            units=h_dim,
-            dropout=dropout, recurrent_dropout=dropout,
-        )
-        m.add(lstm_layer)
+        if pretrained_embedding is None:
+            lstm_layer = keras.layers.LSTM(
+                input_shape=(seq_len, input_dim),
+                return_sequences=False,
+                units=h_dim,
+                dropout=dropout, recurrent_dropout=dropout,
+            )
+            m.add(lstm_layer)
+        else:
+            lstm_layer = pretrained_embedding
+            m.add(lstm_layer)
+            m.add(
+                keras.layers.LSTM(
+                    return_sequences=True,
+                    units=h_dim,
+                    dropout=dropout, recurrent_dropout=dropout,
+                )
+            )
+            m.add(
+                keras.layers.LSTM(
+                    return_sequences=False,
+                    units=h_dim,
+                    dropout=dropout, recurrent_dropout=dropout,
+                )
+            )
         dense_h = keras.layers.Dense(
             units=h_dim,
             activation='selu',
@@ -41,8 +59,9 @@ class SeqCLS(object):
         m.compile(loss=loss, optimizer='adam')
         self.m = m
 
-    def fit(self, X, Y, epochs=50, batch_size=32, ):
-        self.m.fit(X, Y, epochs=epochs, batch_size=batch_size)
+    def fit(self, X, Y, epochs=50, batch_size=32, validation_split=.0, shuffle=True):
+        self.m.fit(X, Y, epochs=epochs, batch_size=batch_size, validation_split=validation_split,
+                   shuffle=shuffle)
 
         tensors = K.function([self.m.layers[0].input, K.learning_phase()],
                                           [self.m.layers[-1].output])
@@ -59,3 +78,7 @@ class SeqCLS(object):
         result = np.zeros((n_iter,) + (X.shape[0], self.num_classes))
         for i in range(n_iter):
             result[i, :, :] = self.model_t((X, 1))[0]
+        return result
+
+    def summary(self):
+        self.m.summary()
