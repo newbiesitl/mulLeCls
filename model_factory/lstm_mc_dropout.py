@@ -4,9 +4,9 @@
 
 import keras
 import keras.backend as K
-import numpy as np
 import tensorflow as tf
 from keras.losses import binary_crossentropy
+import numpy as np
 
 class SeqCLS(object):
     def __init__(self):
@@ -73,9 +73,21 @@ class SeqCLS(object):
 
     def predict_with_uncertainty(self, X, sim=1):
         result = self.sample_output(X, n_iter=sim)
-        prediction = result.mean(axis=0)
-        uncertainty = result.std(axis=0)
-        return prediction, uncertainty
+        prediction = self.m.predict(X)
+        result_cpy = np.swapaxes(result, 0, 1)
+        result_cpy = np.swapaxes(result_cpy, 1, 2)
+        uncertainties = np.zeros((result_cpy.shape[0], result_cpy.shape[1]))
+        for data_idx in range(result_cpy.shape[0]):
+            for topic_idx in range(result_cpy[data_idx].shape[0]):
+                samples = result_cpy[data_idx][topic_idx]
+                ret = np.histogram(samples, normed=True)
+                bins, bin_edges = ret
+                norm_bins = bins/np.sum(bins)
+                for idx in range(len(norm_bins)):
+                    if bin_edges[idx] < prediction[data_idx][topic_idx] <= bin_edges[idx+1]:
+                        uncertainty_score = norm_bins[idx]
+                uncertainties[data_idx][topic_idx] = uncertainty_score
+        return prediction, uncertainties
 
     def sample_output(self, X, n_iter=1):
         result = np.zeros((n_iter,) + (X.shape[0], self.num_classes))
