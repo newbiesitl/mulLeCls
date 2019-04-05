@@ -19,7 +19,8 @@ class SeqCLS(object):
                   verbose=0,
                   ):
         self.num_classes = output_dim
-        with tf.device('/cpu:0'):
+        # with tf.device('/cpu:0'):
+        if True:
             m = keras.models.Sequential()
             if pretrained_embedding is None:
                 lstm_layer = keras.layers.LSTM(
@@ -55,6 +56,8 @@ class SeqCLS(object):
         )
         m.compile(loss=loss, optimizer='adam')
         self.m = m
+        if verbose:
+            self.m.summary()
 
     def fit(self, X, Y, epochs=50, batch_size=32, validation_split=.0, shuffle=True):
         self.m.fit(X, Y, epochs=epochs, batch_size=batch_size, validation_split=validation_split,
