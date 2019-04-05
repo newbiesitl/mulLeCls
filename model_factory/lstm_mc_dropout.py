@@ -56,12 +56,15 @@ class SeqCLS(object):
         )
         m.compile(loss=loss, optimizer='adam')
         self.m = m
+        tensors = K.function([self.m.layers[0].input, K.learning_phase()],
+                                          [self.m.layers[-1].output])
+        self.model_t = tensors
         if verbose:
             self.m.summary()
 
-    def fit(self, X, Y, epochs=50, batch_size=32, validation_split=.0, shuffle=True):
+    def fit(self, X, Y, epochs=50, batch_size=32, validation_split=.0, shuffle=True, verbose=2):
         self.m.fit(X, Y, epochs=epochs, batch_size=batch_size, validation_split=validation_split,
-                   shuffle=shuffle)
+                   shuffle=shuffle, verbose=verbose)
 
         tensors = K.function([self.m.layers[0].input, K.learning_phase()],
                                           [self.m.layers[-1].output])
