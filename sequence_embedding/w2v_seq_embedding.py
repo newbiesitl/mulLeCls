@@ -1,12 +1,48 @@
-# from gensim.models import Word2Vec
-# sequence = [
-#     ['123', '56'],
-#     ['11', '55'],
-#     ['22', '55']
-# ]
-# model = Word2Vec(sequence, size=100, window=5, min_count=1, workers=4)
-# ret = model.predict_output_word(['11'])
-# print(ret)
+
+
+dat = [
+    (101, 11, 'click'),
+    (101, 10, 'click'),
+    (101, 1, 'click'),
+    (101, 2, 'click'),
+    (111, 12, 'click'),
+    (111, 11, 'click'),
+    (111, 10, 'click'),
+    (111, 1, 'click'),
+    (112, 11, 'click'),
+    (112, 10, 'click'),
+    (113, 11, 'click'),
+    (113, 10, 'click'),
+]
+
+
+user_interactions = {}
+for each in dat:
+    user_id, item_id, interaction_type = each
+    if user_id in user_interactions:
+        user_interactions[user_id].append(item_id)
+    else:
+        user_interactions[user_id] = [item_id]
+
+
+
+total_interactions = []
+for user_id in user_interactions:
+    this_user_interaction = user_interactions[user_id]
+    this_user_interaction = [str(x) for x in this_user_interaction]
+    total_interactions.append(this_user_interaction)
+
+print(total_interactions)
+from gensim.models import Word2Vec
+
+model = Word2Vec(total_interactions, size=5, window=100, min_count=1, workers=4)
+ret = model.predict_output_word(['11'])
+print(ret)
+ret = model.similar_by_word('11')
+print(ret)
+ret = model.most_similar(['11'])
+print(ret)
+
 
 
 import numpy as np
